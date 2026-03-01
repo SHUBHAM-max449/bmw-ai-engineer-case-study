@@ -11,7 +11,7 @@ load_dotenv()
 import streamlit as st
 from langchain_core.globals import set_llm_cache
 from langchain_community.cache import InMemoryCache
-from ingestion import vectorstore
+from graph import run_graph
 from pipeline import rag_chain
 from pathlib import Path
 set_llm_cache(InMemoryCache())
@@ -40,6 +40,12 @@ def render_sidebar() -> dict:
             "2. Relevant document chunks are retrieved\n"
             "3. An LLM generates an answer based on the context"
         )
+
+        st.divider()
+        # clear chat history
+        if st.button("🗑️ Clear Chat"):
+            st.session_state.messages = []
+            st.rerun()
 
     return {"top_k": top_k}
 
@@ -78,20 +84,9 @@ def get_bot_response(query: str, top_k: int) -> tuple[str, list[str]]:
         sources = [doc.metadata["source"] for doc in result["source_documents"]]
         return answer, sources
     """
-    dynamic_retriever = vectorstore.as_retriever(search_type="mmr",search_kwargs={"k": top_k})
-    docs = dynamic_retriever.invoke(query)
-    context = "\n\n".join(doc.page_content for doc in docs)
-    sources = list({Path(doc.metadata["source"]).name for doc in docs})
-    answer = rag_chain.invoke({"context": context, "question": query},config={
-        "tags": ["mmr-retriever", "llama3.2:1b", "chunk-500"],
-        "metadata": {
-            "retriever": "mmr",
-            "model": "llama3.2:1b",
-            "chunk_size": 500,
-            "top_k": top_k,
-            "note": "switched from similarity to MMR retriever, added restricted output tokens to 200"
-            }})
-    return answer, sources
+    context, sources = run_graph(query, top_k)
+    return context, sources
+    # return answer, sources
 
 
 # ──────────────────────────────────────────────
@@ -125,11 +120,25 @@ def main():
             st.markdown(prompt)
 
         # Bot response
-        answer, sources = get_bot_response(prompt, top_k=settings["top_k"])
+        context, sources = get_bot_response(prompt, top_k=settings["top_k"])
 
-        response = {"role": "assistant", "content": answer, "sources": sources}
-        render_message(response)
-        st.session_state.messages.append(response)
+        with st.chat_message("assistant"):
+            response_placeholder = st.empty()
+            full_response = ""
+            for chunk in rag_chain.stream({"context": context, "question": prompt}):
+                full_response += chunk
+                response_placeholder.markdown(full_response + "▌")
+            response_placeholder.markdown(full_response)
+            if sources:
+                with st.expander("📄 Sources"):
+                    for source in sources:
+                        st.markdown(f"- {source}")
+
+        st.session_state.messages.append({
+        "role": "assistant",
+        "content": full_response,
+        "sources": sources
+})
 
 
 if __name__ == "__main__":

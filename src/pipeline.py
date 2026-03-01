@@ -35,7 +35,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 #  LLM 
 
-llm = ChatOllama(model=CHAT_MODEL, temperature=Temp, num_predict=200)
+llm = ChatOllama(model=CHAT_MODEL, temperature=Temp, num_predict=500)
 
 #  LCEL Chain 
 
