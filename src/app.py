@@ -75,12 +75,19 @@ def get_bot_response(query: str, top_k: int) -> tuple[str, list[str]]:
         sources = [doc.metadata["source"] for doc in result["source_documents"]]
         return answer, sources
     """
-    dynamic_retriever = vectorstore.as_retriever(search_kwargs={"k": top_k})
+    dynamic_retriever = vectorstore.as_retriever(search_type="mmr",search_kwargs={"k": top_k})
     docs = dynamic_retriever.invoke(query)
     context = "\n\n".join(doc.page_content for doc in docs)
     sources = list({Path(doc.metadata["source"]).name for doc in docs})
-    answer = rag_chain.invoke({"context": context, "question": query})
-    
+    answer = rag_chain.invoke({"context": context, "question": query},config={
+        "tags": ["mmr-retriever", "llama3.2:1b", "chunk-500"],
+        "metadata": {
+            "retriever": "mmr",
+            "model": "llama3.2:1b",
+            "chunk_size": 500,
+            "top_k": top_k,
+            "note": "switched from similarity to MMR retriever"
+            }})
     return answer, sources
 
 
