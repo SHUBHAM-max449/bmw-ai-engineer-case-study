@@ -1,6 +1,19 @@
 # 🚗 BMW Customer Service RAG Chatbot
 
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+![LangChain](https://img.shields.io/badge/LangChain-latest-green)
+![LangGraph](https://img.shields.io/badge/LangGraph-latest-orange)
+![Streamlit](https://img.shields.io/badge/Streamlit-latest-red)
+![Ollama](https://img.shields.io/badge/Ollama-local-purple)
+![LangSmith](https://img.shields.io/badge/LangSmith-monitored-yellow)
+
 > AI-powered chatbot for BMW Group customer journey analytics — built with LangChain, LangGraph, ChromaDB, Ollama, and Streamlit.
+
+---
+
+## Observability — LangSmith
+
+![LangSmith](assets/screencapture-smith-langchain-o-decfba89-31af-4cf1-977b-41230a23f1eb-dashboards-projects-585a7d26-4693-46d7-84e0-48e88e054c43-2026-03-01-15_13_16.png)
 
 ---
 
@@ -72,6 +85,11 @@ bmw-ai-engineer-case-study/
 │
 ├── notebook/
 │   └── model_notebook.ipynb     # benchmarking experiments
+│
+├── assets/                      # screenshots and demo GIF
+│   ├── demo.gif
+│   ├── ui.png
+│   └── langsmith.png
 │
 ├── .env.example                 # environment variables template
 ├── requirements.txt
@@ -145,7 +163,7 @@ The vector store is built automatically on first run. Subsequent runs load the e
 
 ### Model Selection
 - `llama3.2:1b` — best latency/quality tradeoff for local CPU inference
-- Benchmarked against `tinyllama` and `mistral` using LangSmith traces
+- Benchmarked against `tinyllama` using LangSmith traces
 
 ### LangGraph
 - Wraps retrieval in a stateful graph node
