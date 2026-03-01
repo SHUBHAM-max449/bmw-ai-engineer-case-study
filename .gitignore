@@ -1,0 +1,4 @@
+.env
+src/model.py
+data/chroma_db
+src/__pycache__

@@ -4,9 +4,13 @@ Streamlit Chat Interface for the RAG Chatbot.
 This is a starter template — feel free to modify, extend, or replace it entirely.
 Run with: streamlit run src/app.py
 """
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 import streamlit as st
-
+from model import rag_chain, vectorstore
+from pathlib import Path
+from dotenv import load_dotenv
 
 # ──────────────────────────────────────────────
 # UI Components
@@ -70,8 +74,11 @@ def get_bot_response(query: str, top_k: int) -> tuple[str, list[str]]:
         sources = [doc.metadata["source"] for doc in result["source_documents"]]
         return answer, sources
     """
-    answer = "⚠️ RAG pipeline not yet implemented. Connect your chain in `get_bot_response()`!"
-    sources = []
+    retriever = vectorstore.as_retriever(search_type="similarity",search_kwargs={"k":top_k})
+    docs=retriever.invoke(query)
+    context="\n\n".join(doc.page_content for doc in docs)
+    sources = list({Path(doc.metadata["source"]).name for doc in docs}) 
+    answer = rag_chain.invoke({"context": context, "question": query})
     return answer, sources
 
 
