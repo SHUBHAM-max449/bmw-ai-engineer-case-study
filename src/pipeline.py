@@ -1,6 +1,5 @@
 """
 pipeline.py — RAG Pipeline
-Imports vectorstore from ingestion.py
 Builds the prompt template, LLM and LCEL chain.
 """
 
