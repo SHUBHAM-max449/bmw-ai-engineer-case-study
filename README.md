@@ -1,115 +1,202 @@
-# Case Study: AI Engineer Intern – Customer Journey Analytics & Data Science
+# 🚗 BMW Customer Service RAG Chatbot
+
+> AI-powered chatbot for BMW Group customer journey analytics — built with LangChain, LangGraph, ChromaDB, Ollama, and Streamlit.
 
 ---
 
 ## Overview
 
-| Topic | Details |
+This project is a prototype of a local AI-powered chatbot that answers customer questions based on a provided knowledge base. It uses **Retrieval-Augmented Generation (RAG)** to find relevant documents and generate natural language answers — without hallucinating information that isn't in the knowledge base.
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A[👤 User Query] --> B[Streamlit UI]
+    B --> C[LangGraph - Retrieve Node]
+    C --> D[ChromaDB Vector Store]
+    D --> E[MMR Similarity Search]
+    E --> F[Retrieved Chunks + Sources]
+    F --> G[LangChain LCEL Chain]
+    G --> H[Prompt Template]
+    H --> I[Ollama LLM - llama3.2:1b]
+    I --> J[Streaming Response]
+    J --> B
+
+    K[Knowledge Base - 6 docs] --> L[DirectoryLoader]
+    L --> M[RecursiveCharacterTextSplitter - chunk=200]
+    M --> N[nomic-embed-text Embeddings]
+    N --> D
+
+    O[LangSmith] -.->|Traces and Metrics| G
+```
+
+---
+
+## Tech Stack
+
+| Component | Technology | Why |
+|---|---|---|
+| **LLM** | Ollama `llama3.2:1b` | Lightweight, CPU-friendly, no API key needed |
+| **Embeddings** | Ollama `nomic-embed-text` | Best quality/speed tradeoff for local embedding |
+| **Vector Store** | ChromaDB | Local, persistent, native LangChain integration |
+| **Framework** | LangChain LCEL | Composable, each step traceable in LangSmith |
+| **Orchestration** | LangGraph | Modular, extensible, production-ready pattern |
+| **UI** | Streamlit | Fast to build, interactive, easy to demo |
+| **Observability** | LangSmith | Per-step latency, token usage, trace visualization |
+
+---
+
+## Project Structure
+
+```
+bmw-ai-engineer-case-study/
+│
+├── data/
+│   ├── knowledge_base/          # 6 provided .txt documents
+│   │   ├── doc_01_vehicle_features.txt
+│   │   ├── doc_02_service_maintenance.txt
+│   │   ├── doc_03_warranty.txt
+│   │   ├── doc_04_ordering_process.txt
+│   │   ├── doc_05_electric_vehicles.txt
+│   │   └── doc_06_customer_support.txt
+│   └── chroma_db/               # auto-generated vector store
+│
+├── src/
+│   ├── ingestion.py             # document loading, chunking, ChromaDB setup
+│   ├── pipeline.py              # retriever, prompt template, LCEL chain
+│   ├── graph.py                 # LangGraph retrieval node
+│   └── app.py                   # Streamlit chat interface
+│
+├── notebook/
+│   └── model_notebook.ipynb     # benchmarking experiments
+│
+├── .env.example                 # environment variables template
+├── requirements.txt
+└── README.md
+```
+
+---
+
+## Setup Instructions
+
+### Prerequisites
+- Python 3.10+
+- [Ollama](https://ollama.ai) installed and running
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/SHUBHAM-max449/bmw-ai-engineer-case-study.git
+cd bmw-ai-engineer-case-study
+```
+
+### 2. Create virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate        # Mac/Linux
+# venv\Scripts\activate         # Windows
+```
+
+### 3. Install dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Pull Ollama models
+```bash
+ollama pull llama3.2:1b
+ollama pull nomic-embed-text
+```
+
+### 5. Set up environment variables
+```bash
+cp .env.example .env
+```
+Edit `.env` and add your LangSmith API key:
+```
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+LANGCHAIN_API_KEY=your_api_key_here
+LANGCHAIN_PROJECT=bmw-rag-chatbot
+```
+
+### 6. Run the app
+```bash
+streamlit run src/app.py
+```
+
+The vector store is built automatically on first run. Subsequent runs load the existing ChromaDB directly.
+
+---
+
+## Key Technical Decisions
+
+### Chunking Strategy
+- `chunk_size=200`, `chunk_overlap=20`
+- Documents are small (~1000 chars each) — chunk_size=500 caused duplicate retrieval
+- Smaller chunks give more precise retrieval with less redundancy
+
+### Retrieval Strategy
+- **MMR (Maximal Marginal Relevance)** over plain similarity search
+- MMR reduces redundant chunks by balancing relevance and diversity
+- `fetch_k=20` candidates → selects best `top_k` diverse chunks
+
+### Model Selection
+- `llama3.2:1b` — best latency/quality tradeoff for local CPU inference
+- Benchmarked against `tinyllama` and `mistral` using LangSmith traces
+
+### LangGraph
+- Wraps retrieval in a stateful graph node
+- Makes pipeline modular — easy to add query rewriting, guardrails, or routing nodes
+- Each node independently traceable in LangSmith
+
+---
+
+## Benchmarking Results
+
+Model and parameter selection was data-driven using LangSmith observability:
+
+| Step | Change | Result |
+|---|---|---|
+| 1 | Baseline: tinyllama, similarity, chunk=500 | High latency, duplicate chunks |
+| 2 | Model: llama3.2:1b | Better answer quality |
+| 3 | Retriever: similarity → MMR | Less duplicate chunks |
+| 4 | Chunk size: 500 → 200 | Better retrieval precision |
+| 5 | num_predict: unlimited → 200 | Faster generation |
+| 6 | Top-K: 5 → 3 | Optimal context size |
+
+---
+
+## Roadmap
+
+**Short term:**
+- Add query rewriting node in LangGraph
+- Add guardrails node to filter irrelevant questions
+- Improve UI with retrieved context visualization
+
+**Production:**
+- Replace Ollama with cloud-hosted model (GPT-4o, Claude)
+- Replace ChromaDB with Pinecone or Weaviate for scale
+- Add authentication and multi-user support
+- Deploy on AWS/GCP with auto-scaling
+- Self-hosted LangSmith for full observability
+
+---
+
+## Problems Faced & Solutions
+
+| Problem | Solution |
 |---|---|
-| **Position** | Intern AI Engineer – Customer Journey Analytics & Data Science |
-| **Deliverables** | Part A: GitHub Repository (Code) · Part B: Presentation (max. 20 minutes) |
-| **Language** | English |
-| **Start Date** | Friday, 27.02.2026 |
-| **Deadline** | Tuesday, 03.03.2026, 23:59 — all commits pushed to a **public** GitHub repository |
+| LangSmith 401/403 errors | Must set `os.environ` before LangChain imports |
+| LangGraph + streaming conflict | Used LangGraph for retrieval only, streamed generation separately |
+| Duplicate chunks in retrieval | Switched to MMR + reduced chunk size to 200 |
+| ChromaDB rebuilding on every run | Added `os.path.exists()` check before rebuilding |
+| High latency on local CPU | Reduced `num_predict=200`, lowered `top_k=3` |
 
 ---
 
-## Context & Scenario
+## License
 
-You are joining the **Customer Journey Analytics & Data Science** team at a large automotive company. The team is responsible for data-driven analysis and optimization of digital customer channels – including websites, vehicle configurators, and service portals.
-
-Every day, the company receives hundreds of customer inquiries. Many relate to recurring topics: vehicle features, service schedules, warranty terms, or ordering processes. This information already exists in internal knowledge bases but is not always easy to find.
-
-**Your task:** Build a prototype of a **local AI-powered chatbot** that answers customer questions based on a provided knowledge base. The chatbot should use **Retrieval-Augmented Generation (RAG)** to find relevant documents and generate natural language answers.
-
-> **Important:** The focus is on **technical implementation, architecture, and your decision-making process**, not on answer quality. Since the prototype runs locally, we understand there are CPU/GPU constraints. Lightweight models are perfectly fine. We want to see that you understand the concepts and can explain **why** you chose what you chose.
-
----
-
-## Part A: Technical Implementation
-
-### A1 – Setup & Knowledge Base
-
-1. **Set up a local LLM** using [Ollama](https://ollama.ai):
-   - A **Chat model** — a lightweight model works
-   - An **Embedding model**
-2. Use the provided documents in `data/knowledge_base/`
-3. Implement a **Document Ingestion Pipeline**:
-   - Load and process documents
-   - Generate embeddings using your chosen Ollama embedding model
-   - Store embeddings in a **Vector Store** — we recommend [ChromaDB](https://docs.trychroma.com/) for simplicity, but you may use alternatives
-
-### A2 – Implement RAG Pipeline
-
-Build the core chatbot logic:
-
-1. **Retrieval:** For a user query, retrieve the most relevant chunks via similarity search
-2. **Augmentation:** Inject the retrieved context into a prompt
-3. **Generation:** The chat model generates an answer based on the context
-
-**Requirements:**
-- Number of retrieved chunks should be configurable (Top-K)
-- System prompt should instruct the model to answer based on provided context
-- Sources (document titles) should be referenced in the answer
-
-**Framework:** Use **LangChain / LangGraph** as your framework.
-
-
-### A3 – Chat Interface
-
-Build a simple chat interface (e.g. using **Streamlit**):
-
-- Input field for queries
-- Display of chatbot response
-- Display of source documents used
-- Chat history within a session
-
-### A4 – Documentation
-
-Make sure to properly document your code.
-
----
-
-## Part B: Presentation
-
-Create a **presentation (max. 20 minutes)** for a **mixed audience** — both business stakeholders and technical team members should be able to follow along.
-
-The goal is to show that you understand not just **how** to build this, but **why** it matters and where it could go from here.
-
-### What we'd like to see:
-
-- **Business perspective:** What problem does an AI chatbot solve? Why is this relevant for an automotive company? What value does it create?
-- **Solution & Architecture:** High-level overview of your RAG architecture. Why RAG (vs. other approaches)? Explain your key technical decisions and trade-offs.
-- **Demo & Results:** Show your prototype in action (screenshots or preferably **live demo**). What works well, what are the limitations?
-- **Roadmap:** Where could this go next? How would you scale this to production? What would change (models, infrastructure, integrations)? What further use cases do you see?
-- **Summary & Q&A**
-
-### Evaluation Criteria
-
-| Criterion | What we look for |
-|---|---|
-| **Reasoning & Decision-Making** | Clear rationale for technical choices (model, chunk size, retrieval strategy, etc.). We want to understand *why*, not just *what*. |
-| **Business Perspective** | Ability to frame the technical solution in business terms — impact on customer experience, operational efficiency, and strategic value. |
-| **Technical Understanding** | Solid grasp of RAG concepts, LLM fundamentals, and the end-to-end pipeline. |
-| **Communication** | Presenting to a mixed audience — making it accessible for business stakeholders while staying precise for engineers. |
-
----
-
-## How to Submit
-
-1. Click **"Use this template"** → **"Create a new repository"** on this GitHub page
-2. Create your own **public** repository from this template
-3. Work in your own repo — commit and push your code as you go (Make sure to also push the ppt!)
-4. When you're done, share the **link to your repository** with us
-5. **All commits must be pushed before the deadline** — late submissions will not be considered
-
----
-
-## Tips
-
-- **Prioritize a working end-to-end pipeline** over perfection in any single component.
-- **Use small models** (1B–4B params). Answer quality is secondary. We evaluate your implementation and understanding.
-- **Explain your decisions** — we want to understand your thought process.
-- A basic **Streamlit app template** is provided in `src/app.py` — you can use it as a starting point or build your own from scratch.
-
-**Good luck!**
+This project was built as part of a technical case study for BMW Group.

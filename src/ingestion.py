@@ -24,8 +24,8 @@ loader = DirectoryLoader(
 # Step 2: Split into Chunks 
 
 splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=50,
+    chunk_size=200,
+    chunk_overlap=20,
     separators=["\n\n", "\n", " ", ""]
 )
 

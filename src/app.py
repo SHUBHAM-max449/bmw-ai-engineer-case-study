@@ -86,8 +86,6 @@ def get_bot_response(query: str, top_k: int) -> tuple[str, list[str]]:
     """
     context, sources = run_graph(query, top_k)
     return context, sources
-    # return answer, sources
-
 
 # ──────────────────────────────────────────────
 # Main App
@@ -125,7 +123,18 @@ def main():
         with st.chat_message("assistant"):
             response_placeholder = st.empty()
             full_response = ""
-            for chunk in rag_chain.stream({"context": context, "question": prompt}):
+            for chunk in rag_chain.stream({"context": context, "question": prompt}, 
+            config={
+            "tags": ["step-1-tinyllama-similarity"],
+            "metadata": {
+                "model": "llama3.2:1b",
+                "retriever": "mmr",
+                "chunk_size": 200,
+                "num_predict":200,
+                "Trial": 1
+            }
+             }
+                ):
                 full_response += chunk
                 response_placeholder.markdown(full_response + "▌")
             response_placeholder.markdown(full_response)
@@ -139,7 +148,6 @@ def main():
         "content": full_response,
         "sources": sources
 })
-
 
 if __name__ == "__main__":
     main()
