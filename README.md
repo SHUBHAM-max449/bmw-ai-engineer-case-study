@@ -211,7 +211,7 @@ Model and parameter selection was data-driven using LangSmith observability:
 | LangGraph + streaming conflict | Used LangGraph for retrieval only, streamed generation separately |
 | Duplicate chunks in retrieval | Switched to MMR + reduced chunk size to 200 |
 | ChromaDB rebuilding on every run | Added `os.path.exists()` check before rebuilding |
-| High latency on local CPU | Reduced `num_predict=200`, lowered `top_k=3` |
+| High latency on local CPU | Reduced `num_predict=200`, lowered `top_k` giving better result |
 
 ---
 
