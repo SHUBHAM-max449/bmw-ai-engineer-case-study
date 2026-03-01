@@ -83,12 +83,7 @@ bmw-ai-engineer-case-study/
 │   ├── graph.py                 # LangGraph retrieval node
 │   └── app.py                   # Streamlit chat interface
 │
-├── notebook/
-│   └── model_notebook.ipynb     # benchmarking experiments
-│
 ├── assets/                      # screenshots and demo GIF
-│   ├── demo.gif
-│   ├── ui.png
 │   └── langsmith.png
 │
 ├── .env.example                 # environment variables template
