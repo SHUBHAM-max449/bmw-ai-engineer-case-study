@@ -13,7 +13,7 @@
 
 ## Observability — LangSmith
 
-![LangSmith](assets/screencapture-smith-langchain-o-decfba89-31af-4cf1-977b-41230a23f1eb-dashboards-projects-585a7d26-4693-46d7-84e0-48e88e054c43-2026-03-01-15_13_16.png)
+![LangSmith](assets/screencapture-smith-langchain-o-decfba89-31af-4cf1-977b-41230a23f1eb-dashboards-projects-3dbabf24-ad26-4342-bf5a-db473988ccbc-2026-03-01-15_27_39.png)
 
 ---
 
