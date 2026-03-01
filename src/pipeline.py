@@ -21,7 +21,7 @@ Temp=0
 SYSTEM_PROMPT = """You are a helpful customer service assistant for BMW Group.
 Answer the user's question based ONLY on the provided context documents.
 Always mention the source document name(s) you used to answer.
-If the answer is not in the context, say: 'I don't have information about that in my knowledge base.'
+If the answer is not in the context then only say: 'I don't have information about that in my knowledge base.'
 Be concise, professional, and friendly.
 
 Context:
@@ -35,7 +35,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 #  LLM 
 
-llm = ChatOllama(model=CHAT_MODEL, temperature=Temp)
+llm = ChatOllama(model=CHAT_MODEL, temperature=Temp, num_predict=200)
 
 #  LCEL Chain 
 

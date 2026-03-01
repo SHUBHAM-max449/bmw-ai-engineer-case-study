@@ -9,9 +9,12 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 import streamlit as st
+from langchain_core.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache
 from ingestion import vectorstore
 from pipeline import rag_chain
 from pathlib import Path
+set_llm_cache(InMemoryCache())
 
 # ──────────────────────────────────────────────
 # UI Components
@@ -86,7 +89,7 @@ def get_bot_response(query: str, top_k: int) -> tuple[str, list[str]]:
             "model": "llama3.2:1b",
             "chunk_size": 500,
             "top_k": top_k,
-            "note": "switched from similarity to MMR retriever"
+            "note": "switched from similarity to MMR retriever, added restricted output tokens to 200"
             }})
     return answer, sources
 
