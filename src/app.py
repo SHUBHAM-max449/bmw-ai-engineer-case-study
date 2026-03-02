@@ -121,8 +121,8 @@ def main():
             "metadata": {
                 "model": "llama3.2:1b",
                 "retriever": "mmr",
-                "chunk_size": 200,
-                "num_predict":200,
+                "chunk_size": 600,
+                "num_predict":-1,
             }
              }
                 ):
@@ -130,6 +130,10 @@ def main():
                 response_placeholder.markdown(full_response + "▌")
             response_placeholder.markdown(full_response)
             st.toast("Response generated!", icon="✅")
+        if sources:
+            with st.expander("📄 Sources"):
+                for source in sources:
+                    st.markdown(f"- `{source}`") 
 
         st.session_state.messages.append({
         "role": "assistant",

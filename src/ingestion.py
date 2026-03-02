@@ -17,8 +17,8 @@ KNOWLEDGE_BASE_DIR = "data/knowledge_base"
 CHROMA_PERSIST_DIR = "data/chroma_db"
 COLLECTION_NAME    = "knowledge_base"
 EMBEDDING_MODEL    = "nomic-embed-text"
-CHUNK_SIZE         = 200
-CHUNK_OVERLAP      = 20
+CHUNK_SIZE         = 600
+CHUNK_OVERLAP      = 50
 
 # Step 1: Load Documents
 
