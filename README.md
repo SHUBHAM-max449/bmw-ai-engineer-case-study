@@ -1,11 +1,11 @@
 # 🚗 BMW Customer Service RAG Chatbot
 
-![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![LangChain](https://img.shields.io/badge/LangChain-0.3-green)
-![LangGraph](https://img.shields.io/badge/LangGraph-0.2-orange)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.40-red)
-![Ollama](https://img.shields.io/badge/Ollama-local-purple)
-![LangSmith](https://img.shields.io/badge/LangSmith-monitored-yellow)
+![Python](https://img.shields.io/badge/Python-blue)
+![LangChain](https://img.shields.io/badge/LangChain-green)
+![LangGraph](https://img.shields.io/badge/LangGraph-orange)
+![Streamlit](https://img.shields.io/badge/Streamlit-red)
+![Ollama](https://img.shields.io/badge/Ollama-purple)
+![LangSmith](https://img.shields.io/badge/LangSmith-yellow)
 
 > AI-powered chatbot for BMW Group customer journey analytics — built with LangChain, LangGraph, ChromaDB, Ollama, and Streamlit.
 
