@@ -73,7 +73,7 @@ bmw-ai-engineer-case-study/
 │
 ├── src/
 │   ├── ingestion.py             # document loading, chunking, ChromaDB setup
-│   ├── pipeline.py              # retriever, prompt template, LCEL chain
+│   ├── pipeline.py              # prompt template, LCEL chain
 │   ├── graph.py                 # LangGraph retrieval node
 │   └── app.py                   # Streamlit chat interface
 │
