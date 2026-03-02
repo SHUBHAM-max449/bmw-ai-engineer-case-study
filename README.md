@@ -28,12 +28,12 @@ flowchart TD
     E --> F[Retrieved Chunks + Sources]
     F --> G[LangChain LCEL Chain]
     G --> H[Prompt Template]
-    H --> I[Ollama LLM - llama3.2:1b]
+    H --> I[Ollama LLM - llama3.2:3b]
     I --> J[Streaming Response]
     J --> B
 
     K[Knowledge Base - 6 docs] --> L[DirectoryLoader]
-    L --> M[RecursiveCharacterTextSplitter - chunk=200]
+    L --> M[RecursiveCharacterTextSplitter - chunk=600, overlap=50]
     M --> N[nomic-embed-text Embeddings]
     N --> D
 
@@ -46,7 +46,7 @@ flowchart TD
 
 | Component | Technology | Why |
 |---|---|---|
-| **LLM** | Ollama `llama3.2:1b` | Lightweight, CPU-friendly, no API key needed |
+| **LLM** | Ollama `llama3.2:3b` | Better answer quality over 1b with acceptable local CPU latency |
 | **Embeddings** | Ollama `nomic-embed-text` | Best quality/speed tradeoff for local embedding |
 | **Vector Store** | ChromaDB | Local, persistent, native LangChain integration |
 | **Framework** | LangChain LCEL | Composable, each step traceable in LangSmith |
@@ -113,7 +113,7 @@ pip install -r requirements.txt
 
 ### 4. Pull Ollama models
 ```bash
-ollama pull llama3.2:1b
+ollama pull llama3.2:3b
 ollama pull nomic-embed-text
 ```
 
@@ -136,14 +136,20 @@ streamlit run src/app.py
 
 The vector store is built automatically on first run. Subsequent runs load the existing ChromaDB directly.
 
+> **Note:** If you change chunk settings, rebuild the vector store with:
+> ```bash
+> python src/ingestion.py --rebuild
+> ```
+
 ---
 
 ## Key Technical Decisions
 
 ### Chunking Strategy
-- `chunk_size=200`, `chunk_overlap=20`
-- Documents are small (~1000 chars each) — chunk_size=500 caused duplicate retrieval
-- Smaller chunks give more precise retrieval with less redundancy
+- `chunk_size=600`, `chunk_overlap=50`
+- Larger chunks preserve more context per retrieval unit, improving answer coherence
+- Overlap of 50 ensures sentences split across chunk boundaries are still captured
+- Benchmarked against chunk_size=200 — 600 gave noticeably better answer quality with llama3.2:3b
 
 ### Retrieval Strategy
 - **MMR (Maximal Marginal Relevance)** over plain similarity search
@@ -151,8 +157,8 @@ The vector store is built automatically on first run. Subsequent runs load the e
 - `fetch_k=20` candidates → selects best `top_k` diverse chunks
 
 ### Model Selection
-- `llama3.2:1b` — best latency/quality tradeoff for local CPU inference
-- Benchmarked against `tinyllama` using LangSmith traces
+- `llama3.2:3b` — better answer quality than 1b with still-acceptable local CPU latency
+- Benchmarked against `tinyllama` and `llama3.2:1b` using LangSmith traces
 
 ### LangGraph
 - Wraps retrieval in a stateful graph node
@@ -168,11 +174,13 @@ Model and parameter selection was data-driven using LangSmith observability:
 | Step | Change | Result |
 |---|---|---|
 | 1 | Baseline: tinyllama, similarity, chunk=500 | High latency, duplicate chunks |
-| 2 | Model: llama3.2:1b | Better answer quality |
+| 2 | Model: tinyllama → llama3.2:1b | Better answer quality |
 | 3 | Retriever: similarity → MMR | Less duplicate chunks |
 | 4 | Chunk size: 500 → 200 | Better retrieval precision |
 | 5 | num_predict: unlimited → 200 | Faster generation |
 | 6 | Top-K: 5 → 3 | Optimal context size |
+| 7 | Model: llama3.2:1b → llama3.2:3b | Noticeably better answer quality |
+| 8 | Chunk size: 200 → 600, overlap: 20 → 50 | Better context coherence, improved answers |
 
 ---
 
@@ -204,9 +212,9 @@ Model and parameter selection was data-driven using LangSmith observability:
 |---|---|
 | LangSmith 401/403 errors | Must set `os.environ` before LangChain imports |
 | LangGraph + streaming conflict | Used LangGraph for retrieval only, streamed generation separately |
-| Duplicate chunks in retrieval | Switched to MMR + reduced chunk size to 200 |
+| Duplicate chunks in retrieval | Switched to MMR + reduced chunk size to 200, then tuned to 600 for better coherence |
 | ChromaDB rebuilding on every run | Added `os.path.exists()` check before rebuilding |
-| High latency on local CPU | Reduced `num_predict=200`, lowered `top_k` giving better result |
+| High latency on local CPU | Reduced `num_predict=200`, lowered `top_k=3`, chose llama3.2:3b for best quality/latency balance |
 
 ---
 

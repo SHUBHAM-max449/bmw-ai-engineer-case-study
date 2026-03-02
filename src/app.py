@@ -82,7 +82,7 @@ def main():
     )
 
     st.title("🚗 Customer Service Chatbot")
-    st.caption("Powered by llama3.2:1b · ChromaDB · LangChain · LangGraph")
+    st.caption("Powered by llama3.2:3b · ChromaDB · LangChain · LangGraph")
     st.image("assets/Gemini_Generated_Image_frzkn1frzkn1frzk.png", use_container_width=True)
     st.divider()
 
@@ -117,9 +117,9 @@ def main():
             full_response = ""
             for chunk in rag_chain.stream({"context": context, "question": prompt}, # stream LLM response token by token — better UX than waiting for full response
             config={
-            "tags": ["llama3.2:1b-mmr-chunk200-final"],  # Metadata for the langsmith tracking
+            "tags": ["llama3.2:3b-mmr-chunk600-final"],  # Metadata for the langsmith tracking
             "metadata": {
-                "model": "llama3.2:1b",
+                "model": "llama3.2:3b",
                 "retriever": "mmr",
                 "chunk_size": 600,
                 "num_predict":-1,
