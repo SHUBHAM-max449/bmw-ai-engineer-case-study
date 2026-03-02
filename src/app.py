@@ -5,7 +5,6 @@ This is a starter template — feel free to modify, extend, or replace it entire
 Run with: streamlit run src/app.py
 """
 
-import os
 from dotenv import load_dotenv
 load_dotenv()
 import streamlit as st
@@ -13,8 +12,7 @@ from langchain_core.globals import set_llm_cache
 from langchain_community.cache import InMemoryCache
 from graph import run_graph
 from pipeline import rag_chain
-from pathlib import Path
-set_llm_cache(InMemoryCache())
+set_llm_cache(InMemoryCache()) # cache repeated queries for faster responses
 
 # ──────────────────────────────────────────────
 # UI Components
@@ -36,9 +34,9 @@ def render_sidebar() -> dict:
         st.divider()
         st.markdown("**How it works**")
         st.markdown(
-            "1. Your question is embedded\n"
-            "2. Relevant document chunks are retrieved\n"
-            "3. An LLM generates an answer based on the context"
+            "1. Your question is embedded using **nomic-embed-text**\n"
+            "2. **LangGraph** retrieves relevant chunks via **MMR** search\n"
+            "3. **llama3.2:1b** generates a grounded answer from context"
         )
 
         st.divider()
@@ -67,23 +65,7 @@ def render_chat_history() -> None:
 
 
 def get_bot_response(query: str, top_k: int) -> tuple[str, list[str]]:
-    """
-    Generate a chatbot response for the given query.
-
-    TODO: Replace this placeholder with your RAG pipeline.
-    Your implementation should:
-      1. Retrieve relevant chunks from the vector store (use top_k)
-      2. Pass the retrieved context + query to the LLM
-      3. Return the answer and a list of source document titles
-
-    Example:
-        from rag_chain import get_rag_chain
-        chain = get_rag_chain(top_k=top_k)
-        result = chain.invoke({"question": query})
-        answer = result["answer"]
-        sources = [doc.metadata["source"] for doc in result["source_documents"]]
-        return answer, sources
-    """
+    # LangGraph handles retrieval — generation done separately for streaming support
     context, sources = run_graph(query, top_k)
     return context, sources
 
@@ -95,11 +77,14 @@ def main():
     st.set_page_config(
         page_title="Customer Service Chatbot",
         page_icon="🚗",
+
         layout="centered",
     )
 
     st.title("🚗 Customer Service Chatbot")
-    st.caption("Ask questions about vehicles, services, warranty, and more.")
+    st.caption("Powered by llama3.2:1b · ChromaDB · LangChain · LangGraph")
+    st.image("assets/Gemini_Generated_Image_frzkn1frzkn1frzk.png", use_container_width=True)
+    st.divider()
 
     # Sidebar
     settings = render_sidebar()
@@ -108,46 +93,49 @@ def main():
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
+    if not st.session_state.messages:
+        st.info("👋 Ask me anything about vehicles, warranty, service, or ordering process.")
+
     render_chat_history()
 
     # Chat input
     if prompt := st.chat_input("Ask a question..."):
         # User message
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
+        with st.chat_message("user", avatar="🧍‍♂️"):
             st.markdown(prompt)
 
         # Bot response
-        context, sources = get_bot_response(prompt, top_k=settings["top_k"])
+        with st.status("Processing your query...", expanded=True) as status:
+            st.write("🔍 Retrieving relevant chunks from ChromaDB...")
+            context, sources = get_bot_response(prompt, top_k=settings["top_k"])
+            st.write("🤖 Generating response...")
+            status.update(label="✅ Done!", state="complete", expanded=False)
 
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar="🤖"):
             response_placeholder = st.empty()
             full_response = ""
-            for chunk in rag_chain.stream({"context": context, "question": prompt}, 
+            for chunk in rag_chain.stream({"context": context, "question": prompt}, # stream LLM response token by token — better UX than waiting for full response
             config={
-            "tags": ["step-1-tinyllama-similarity"],
+            "tags": ["llama3.2:1b-mmr-chunk200-final"],  # Metadata for the langsmith tracking
             "metadata": {
                 "model": "llama3.2:1b",
                 "retriever": "mmr",
                 "chunk_size": 200,
                 "num_predict":200,
-                "Trial": 1
             }
              }
                 ):
                 full_response += chunk
                 response_placeholder.markdown(full_response + "▌")
             response_placeholder.markdown(full_response)
-            if sources:
-                with st.expander("📄 Sources"):
-                    for source in sources:
-                        st.markdown(f"- {source}")
+            st.toast("Response generated!", icon="✅")
 
         st.session_state.messages.append({
         "role": "assistant",
         "content": full_response,
         "sources": sources
-})
+        })
 
 if __name__ == "__main__":
     main()

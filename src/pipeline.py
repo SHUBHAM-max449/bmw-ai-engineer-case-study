@@ -15,7 +15,8 @@ from langchain_core.output_parsers import StrOutputParser
 #  Configuration 
 
 CHAT_MODEL = "llama3.2:1b"
-Temp=0
+TEMPERATURE = 0   
+NUM_PREDICT = 200
 
 #  Prompt Template 
 
@@ -36,7 +37,7 @@ prompt = ChatPromptTemplate.from_messages([
 
 #  LLM 
 
-llm = ChatOllama(model=CHAT_MODEL, temperature=Temp, num_predict=200)
+llm = ChatOllama(model=CHAT_MODEL, temperature=TEMPERATURE, num_predict=NUM_PREDICT)
 
 #  LCEL Chain 
 

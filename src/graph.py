@@ -2,7 +2,7 @@
 graph.py — LangGraph Pipeline
 Handles retrieval node only.
 Generation is handled separately in app.py for streaming support.
-retrieve_node -> END
+START -> retrieve_node -> END
 """
 
 from pathlib import Path
@@ -46,7 +46,6 @@ workflow.add_edge(START,"retrieve")
 workflow.add_edge("retrieve", END)
 
 graph = workflow.compile()
-print("LangGraph compiled: retrieve -> END")
 
 #  Public Interface 
 def run_graph(query: str, top_k: int = 3) -> tuple[str, list[str]]:
