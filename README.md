@@ -11,12 +11,6 @@
 
 ---
 
-## Observability — LangSmith
-
-![LangSmith](assets/screencapture-smith-langchain-o-decfba89-31af-4cf1-977b-41230a23f1eb-dashboards-projects-3dbabf24-ad26-4342-bf5a-db473988ccbc-2026-03-01-15_27_39.png)
-
----
-
 ## Overview
 
 This project is a prototype of a local AI-powered chatbot that answers customer questions based on a provided knowledge base. It uses **Retrieval-Augmented Generation (RAG)** to find relevant documents and generate natural language answers — without hallucinating information that isn't in the knowledge base.
@@ -195,6 +189,12 @@ Model and parameter selection was data-driven using LangSmith observability:
 - Add authentication and multi-user support
 - Deploy on AWS/GCP with auto-scaling
 - Self-hosted LangSmith for full observability
+
+---
+
+## Observability — LangSmith
+
+![LangSmith](assets/screencapture-smith-langchain-o-decfba89-31af-4cf1-977b-41230a23f1eb-dashboards-projects-3dbabf24-ad26-4342-bf5a-db473988ccbc-2026-03-01-15_27_39.png)
 
 ---
 
