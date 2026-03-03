@@ -154,7 +154,7 @@ The vector store is built automatically on first run. Subsequent runs load the e
 ### Retrieval Strategy
 - **MMR (Maximal Marginal Relevance)** over plain similarity search
 - MMR reduces redundant chunks by balancing relevance and diversity
-- `fetch_k=20` candidates → selects best `top_k` diverse chunks
+
 
 ### Model Selection
 - `llama3.2:3b` — better answer quality than 1b with still-acceptable local CPU latency
@@ -202,7 +202,7 @@ Model and parameter selection was data-driven using LangSmith observability:
 
 ## Observability — LangSmith
 
-![LangSmith](assets/screencapture-smith-langchain-o-decfba89-31af-4cf1-977b-41230a23f1eb-dashboards-projects-3dbabf24-ad26-4342-bf5a-db473988ccbc-2026-03-01-15_27_39.png)
+![LangSmith](assets/screencapture-smith-langchain-o-decfba89-31af-4cf1-977b-41230a23f1eb-dashboards-projects-3dbabf24-ad26-4342-bf5a-db473988ccbc-2026-03-03-01_06_56.png)
 
 ---
 

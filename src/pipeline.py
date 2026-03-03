@@ -16,7 +16,7 @@ from langchain_core.output_parsers import StrOutputParser
 
 CHAT_MODEL = "llama3.2:3b"
 TEMPERATURE = 0   
-NUM_PREDICT = -1
+NUM_PREDICT = 200
 
 #  Prompt Template 
 

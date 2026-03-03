@@ -36,7 +36,7 @@ def render_sidebar() -> dict:
         st.markdown(
             "1. Your question is embedded using **nomic-embed-text**\n"
             "2. **LangGraph** retrieves relevant chunks via **MMR** search\n"
-            "3. **llama3.2:1b** generates a grounded answer from context"
+            "3. **llama3.2:3b** generates a grounded answer from context"
         )
 
         st.divider()
@@ -117,12 +117,12 @@ def main():
             full_response = ""
             for chunk in rag_chain.stream({"context": context, "question": prompt}, # stream LLM response token by token — better UX than waiting for full response
             config={
-            "tags": ["llama3.2:3b-mmr-chunk600-final"],  # Metadata for the langsmith tracking
+            "tags": ["llama3.2:3b-mmr-chunk600"],  # Metadata for the langsmith tracking
             "metadata": {
                 "model": "llama3.2:3b",
                 "retriever": "mmr",
-                "chunk_size": 600,
-                "num_predict":-1,
+                "chunk_size":600,
+                "num_predict":200
             }
              }
                 ):
